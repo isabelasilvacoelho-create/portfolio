@@ -1,6 +1,3 @@
-bash
-
-cat > /mnt/user-data/outputs/index.html << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -18,7 +15,7 @@ cat > /mnt/user-data/outputs/index.html << 'HTMLEOF'
   html { scroll-behavior: smooth; }
   body { background: var(--paper); color: var(--ink); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.65; overflow-x: hidden; }
 
-  /* EDIT BAR */
+  /* ── EDIT MODE TOGGLE ── */
   #edit-bar {
     position: fixed; bottom: 24px; right: 24px; z-index: 999;
     display: flex; align-items: center; gap: 12px;
@@ -34,78 +31,159 @@ cat > /mnt/user-data/outputs/index.html << 'HTMLEOF'
     transition: background .2s;
   }
   #toggle-edit:hover { background: var(--gold); }
-  #toggle-edit .dot { width: 8px; height: 8px; border-radius: 50%; background: #555; transition: background .2s; }
+  #toggle-edit .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #555; transition: background .2s;
+  }
   body.editing #toggle-edit { background: var(--gold); }
   body.editing #toggle-edit .dot { background: #fff; }
-  #btn-export {
-    background: var(--paper); color: var(--ink);
-    border: 1px solid var(--line); cursor: pointer;
-    padding: 12px 22px; border-radius: 30px;
-    font-family: 'Inter', sans-serif;
-    font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
-    box-shadow: 0 4px 24px rgba(0,0,0,.1);
-    transition: background .2s;
-    display: none;
-  }
-  body.editing #btn-export { display: flex; }
-  #btn-export:hover { background: var(--gold); color: #fff; border-color: var(--gold); }
   #save-toast {
     background: var(--ink); color: var(--paper);
     padding: 10px 20px; border-radius: 20px;
     font-size: 12px; font-weight: 500; letter-spacing: 0.06em;
-    opacity: 0; pointer-events: none; transition: opacity .3s;
+    opacity: 0; pointer-events: none;
+    transition: opacity .3s;
   }
   #save-toast.show { opacity: 1; }
 
-  /* EDITABLE */
+  /* ── EDITABLE ELEMENTS ── */
   body.editing [contenteditable] {
-    outline: 2px dashed var(--edit-ring); border-radius: 3px;
-    cursor: text; min-width: 30px; min-height: 1em; transition: outline .15s;
+    outline: 2px dashed var(--edit-ring);
+    border-radius: 3px;
+    cursor: text;
+    min-width: 30px; min-height: 1em;
+    transition: outline .15s;
   }
-  body.editing [contenteditable]:focus { outline: 2px solid var(--gold); background: rgba(201,151,74,.06); }
-  body.editing [contenteditable]:empty::before { content: attr(data-placeholder); color: rgba(150,140,130,.6); font-style: italic; pointer-events: none; }
+  body.editing [contenteditable]:focus {
+    outline: 2px solid var(--gold);
+    background: rgba(201,151,74,.06);
+  }
+  body.editing [contenteditable]:empty::before {
+    content: attr(data-placeholder);
+    color: rgba(150,140,130,.6);
+    font-style: italic; pointer-events: none;
+  }
 
-  /* PHOTO SLOTS */
+  /* ── PHOTO SLOTS ── */
   .photo-slot {
-    position: relative; overflow: hidden; aspect-ratio: 4/3;
-    background: rgba(0,0,0,.06); border: 1.5px dashed rgba(0,0,0,.15);
-    border-radius: 4px; display: flex; align-items: center; justify-content: center;
-    flex-direction: column; gap: 6px; cursor: default; transition: border-color .2s;
+    position: relative; overflow: hidden;
+    aspect-ratio: 4/3;
+    background: rgba(0,0,0,.08);
+    border: 1.5px dashed rgba(0,0,0,.2);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 6px;
+    cursor: default;
+    transition: border-color .2s;
   }
-  .photo-slot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 3px; }
+  .photo-slot img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%; object-fit: cover;
+    border-radius: 3px;
+  }
   .photo-slot .slot-overlay {
-    position: absolute; inset: 0; background: rgba(0,0,0,.45);
-    display: none; align-items: center; justify-content: center; flex-direction: column;
-    gap: 6px; border-radius: 3px; color: #fff; font-size: 11px; font-weight: 600;
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,.45);
+    display: none;
+    align-items: center; justify-content: center; flex-direction: column;
+    gap: 6px; border-radius: 3px;
+    color: #fff; font-size: 11px; font-weight: 600;
     letter-spacing: 0.08em; text-transform: uppercase;
   }
   body.editing .photo-slot { cursor: pointer; }
   body.editing .photo-slot:hover { border-color: var(--gold); }
   body.editing .photo-slot:hover .slot-overlay { display: flex; }
   body.editing .photo-slot:hover .slot-icon { opacity: .3; }
-  .dark-card .photo-slot { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.15); }
+  .dark-card .photo-slot {
+    background: rgba(255,255,255,.05);
+    border-color: rgba(255,255,255,.15);
+  }
   .dark-card .photo-slot span { color: rgba(255,255,255,.4); }
   .slot-icon { display: flex; flex-direction: column; align-items: center; gap: 6px; }
   .slot-icon svg { opacity: .3; }
   .slot-icon span { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; opacity: .7; color: var(--mid); }
+  .dark-card .slot-icon span { color: rgba(255,255,255,.4); }
 
-  /* NAV */
+  /* ── VIDEO SLOT ── */
+  .video-slot { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 40px; }
+  .video-embed-wrap { width: 100%; aspect-ratio: 16/9; border-radius: 6px; overflow: hidden; display: none; }
+  .video-embed-wrap iframe { width: 100%; height: 100%; border: 0; }
+  .video-placeholder-ui { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
+  .play-btn {
+    width: 72px; height: 72px;
+    border: 2px solid var(--gold); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .play-btn svg { fill: var(--gold); margin-left: 4px; }
+  .video-url-input-wrap { width: 100%; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+  .video-url-box {
+    width: 100%;
+    background: rgba(255,255,255,.06);
+    border: 1px dashed rgba(255,255,255,.2);
+    border-radius: 4px;
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .video-url-box span { font-size: 11px; color: rgba(255,255,255,.35); letter-spacing: 0.06em; }
+  #video-input-field {
+    display: none;
+    width: 100%;
+    background: rgba(255,255,255,.08);
+    border: 1px solid var(--gold);
+    border-radius: 4px;
+    padding: 10px 14px;
+    color: #fff; font-family: 'Inter', sans-serif; font-size: 12px;
+    outline: none;
+  }
+  #video-input-field::placeholder { color: rgba(255,255,255,.3); }
+  .video-set-btn {
+    display: none;
+    padding: 8px 20px;
+    background: var(--gold); color: #fff;
+    border: none; border-radius: 4px; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
+  body.editing .video-url-box { cursor: pointer; border-color: rgba(201,151,74,.4); }
+  body.editing #video-input-field { display: block; }
+  body.editing .video-set-btn { display: inline-block; }
+  .results-strip { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .result-pill {
+    padding: 6px 14px;
+    background: rgba(201,151,74,.15);
+    border: 1px solid rgba(201,151,74,.3); border-radius: 2px;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--gold-lt);
+  }
+  body.editing .result-pill[contenteditable]:focus { background: rgba(201,151,74,.25); }
+  .add-result-btn {
+    display: none;
+    padding: 6px 12px;
+    background: transparent; border: 1px dashed rgba(201,151,74,.4);
+    border-radius: 2px; color: rgba(201,151,74,.6);
+    font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; font-family: 'Inter', sans-serif;
+  }
+  body.editing .add-result-btn { display: inline-block; }
+
+  /* ── NAV ── */
   nav {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
     display: flex; align-items: center; justify-content: space-between;
-    padding: 20px 48px; background: var(--paper); border-bottom: 1px solid var(--line);
+    padding: 20px 48px; background: var(--paper);
+    border-bottom: 1px solid var(--line);
   }
   .nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.12em; color: var(--ink); text-decoration: none; }
   .nav-links { display: flex; gap: 32px; list-style: none; }
   .nav-links a { font-size: 12px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; color: var(--mid); transition: color .2s; }
   .nav-links a:hover { color: var(--gold); }
 
-  /* HERO */
+  /* ── HERO ── */
   .hero { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; padding-top: 80px; }
   .hero-left { display: flex; flex-direction: column; justify-content: center; padding: 80px 48px; border-right: 1px solid var(--line); }
   .hero-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 24px; }
   .hero-name { font-family: 'Bebas Neue', sans-serif; font-size: clamp(60px, 7vw, 100px); line-height: 0.92; letter-spacing: 0.02em; color: var(--ink); margin-bottom: 32px; }
-  .hero-name .name-gold { color: var(--gold); }
+  .hero-name span { color: var(--gold); }
   .hero-bio { font-size: 16px; font-weight: 300; color: var(--mid); max-width: 420px; margin-bottom: 48px; line-height: 1.8; }
   .hero-tags { display: flex; flex-wrap: wrap; gap: 10px; }
   .tag { border: 1px solid var(--line); padding: 6px 16px; font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); border-radius: 2px; display: inline-block; }
@@ -123,13 +201,13 @@ cat > /mnt/user-data/outputs/index.html << 'HTMLEOF'
   .hero-quote { margin-top: 40px; position: relative; z-index: 2; padding: 24px 28px; border-left: 3px solid var(--gold); }
   .hero-quote p { font-family: 'Playfair Display', serif; font-style: italic; font-size: 17px; color: rgba(255,255,255,.75); line-height: 1.7; }
 
-  /* SECTIONS */
+  /* ── SECTIONS ── */
   section { padding: 100px 48px; }
   .section-header { display: flex; align-items: baseline; gap: 24px; margin-bottom: 64px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
   .section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); white-space: nowrap; }
   .section-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(36px, 4vw, 52px); letter-spacing: 0.03em; color: var(--ink); }
 
-  /* PROJECT CARDS */
+  /* ── PROJECT CARDS ── */
   #projetos { background: var(--paper); }
   .project-card { display: grid; grid-template-columns: 1fr 1fr; min-height: 480px; border: 1px solid var(--line); margin-bottom: 2px; overflow: hidden; transition: border-color .3s; }
   .project-card:hover { border-color: var(--gold); }
@@ -139,8 +217,6 @@ cat > /mnt/user-data/outputs/index.html << 'HTMLEOF'
   .dark-card .project-visual { background: var(--ink); }
   .photo-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 32px; }
   .photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
-  .photo-grid-single { width: 100%; height: 100%; }
-  .photo-grid-single .photo-slot { aspect-ratio: unset; height: 100%; min-height: 300px; border-radius: 0; border: none; }
   .photo-label { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mid); font-weight: 500; }
   .dark-card .photo-label { color: rgba(255,255,255,.3); }
   .project-content { padding: 56px 48px; display: flex; flex-direction: column; justify-content: center; }
@@ -158,56 +234,26 @@ cat > /mnt/user-data/outputs/index.html << 'HTMLEOF'
   body.editing .add-skill-btn { display: inline-block; }
   body.editing .skill-badge { cursor: text; }
 
-  /* VIDEO */
-  .video-slot { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 40px; }
-  .video-embed-wrap { width: 100%; aspect-ratio: 16/9; border-radius: 6px; overflow: hidden; display: none; }
-  .video-embed-wrap iframe { width: 100%; height: 100%; border: 0; }
-  .video-placeholder-ui { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
-  .play-btn { width: 72px; height: 72px; border: 2px solid var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-  .play-btn svg { fill: var(--gold); margin-left: 4px; }
-  .video-url-input-wrap { width: 100%; display: flex; flex-direction: column; gap: 8px; align-items: center; }
-  .video-url-box { width: 100%; background: rgba(255,255,255,.06); border: 1px dashed rgba(255,255,255,.2); border-radius: 4px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
-  .video-url-box span { font-size: 11px; color: rgba(255,255,255,.35); letter-spacing: 0.06em; }
-  #video-input-field { display: none; width: 100%; background: rgba(255,255,255,.08); border: 1px solid var(--gold); border-radius: 4px; padding: 10px 14px; color: #fff; font-family: 'Inter', sans-serif; font-size: 12px; outline: none; }
-  #video-input-field::placeholder { color: rgba(255,255,255,.3); }
-  .video-set-btn { display: none; padding: 8px 20px; background: var(--gold); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
-  body.editing .video-url-box { cursor: pointer; border-color: rgba(201,151,74,.4); }
-  body.editing #video-input-field { display: block; }
-  body.editing .video-set-btn { display: inline-block; }
-  .results-strip { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
-  .result-pill { padding: 6px 14px; background: rgba(201,151,74,.15); border: 1px solid rgba(201,151,74,.3); border-radius: 2px; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-lt); }
-  .add-result-btn { display: none; padding: 6px 12px; background: transparent; border: 1px dashed rgba(201,151,74,.4); border-radius: 2px; color: rgba(201,151,74,.6); font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: 'Inter', sans-serif; }
-  body.editing .add-result-btn { display: inline-block; }
-
-  /* ABOUT */
+  /* ── ABOUT ── */
   #sobre { background: var(--ink); color: var(--paper); }
   #sobre .section-title { color: var(--paper); }
-  #sobre .section-header { border-bottom-color: rgba(255,255,255,.1); }
   .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
-  .about-photo { width: 100%; aspect-ratio: 3/4; background: rgba(255,255,255,.05); border: 1.5px dashed rgba(255,255,255,.15); border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px; position: relative; overflow: hidden; cursor: default; transition: border-color .2s; }
-  .about-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 3px; }
-  .about-photo .slot-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: center; justify-content: center; flex-direction: column; gap: 6px; color: #fff; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
-  body.editing .about-photo { cursor: pointer; }
-  body.editing .about-photo:hover { border-color: var(--gold); }
-  body.editing .about-photo:hover .slot-overlay { display: flex; }
-  body.editing .about-photo:hover .slot-icon { opacity: .3; }
   .about-text p { font-size: 16px; font-weight: 300; line-height: 1.9; color: rgba(255,255,255,.65); margin-bottom: 24px; }
   .about-text p strong { color: var(--gold); font-weight: 600; }
   .edu-block { margin-top: 40px; }
   .edu-item { padding: 24px 0; border-bottom: 1px solid rgba(255,255,255,.08); }
   .edu-degree { font-size: 14px; font-weight: 600; color: var(--paper); margin-bottom: 4px; }
   .edu-inst { font-size: 12px; color: rgba(255,255,255,.4); letter-spacing: 0.06em; }
-  .expertise-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: rgba(255,255,255,.05); margin-top: 40px; }
+  .expertise-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: rgba(255,255,255,.05); }
   .expertise-item { padding: 28px 24px; background: var(--ink); transition: background .2s; }
   .expertise-item:hover { background: #1a1a1a; }
   .exp-icon { width: 32px; height: 32px; background: rgba(201,151,74,.12); border-radius: 6px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
-  .exp-icon svg { stroke: var(--gold); fill: none; }
   .exp-title { font-size: 13px; font-weight: 600; color: var(--paper); margin-bottom: 6px; letter-spacing: 0.03em; }
   .exp-desc { font-size: 12px; color: rgba(255,255,255,.35); line-height: 1.6; }
 
-  /* CONTACT */
+  /* ── CONTACT ── */
   #contato { background: var(--paper); text-align: center; padding: 100px 48px 80px; }
-  #contato .section-header { justify-content: center; border-bottom-color: var(--line); }
+  #contato .section-header { justify-content: center; }
   .contact-lead { font-size: 18px; font-weight: 300; color: var(--mid); max-width: 500px; margin: 0 auto 48px; line-height: 1.8; }
   .contact-cta { display: inline-block; padding: 18px 48px; background: var(--ink); color: var(--paper); font-size: 12px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; text-decoration: none; border-radius: 2px; transition: background .2s; }
   .contact-cta:hover { background: var(--gold); }
@@ -217,6 +263,49 @@ cat > /mnt/user-data/outputs/index.html << 'HTMLEOF'
 
   footer { padding: 24px 48px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
   footer span { font-size: 11px; color: var(--mid); letter-spacing: 0.06em; }
+
+  /* ── LOCAL VIDEO SLOT (PDV) ── */
+  .local-video-slot {
+    width: 100%;
+    height: 80px;
+    background: rgba(255,255,255,.04);
+    border: 1.5px dashed rgba(255,255,255,.15);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+    cursor: default;
+    transition: border-color .2s, height .3s ease;
+  }
+  .local-video-slot.has-video {
+    height: 160px;
+    border-color: rgba(201,151,74,.4);
+  }
+  body.editing .local-video-slot { cursor: pointer; }
+  body.editing .local-video-slot:hover { border-color: var(--gold); }
+  body.editing .local-video-slot:hover .lvs-placeholder { opacity: .3; }
+  body.editing .local-video-slot:hover .lvs-overlay { display: flex; }
+  .local-video-slot.has-video .lvs-placeholder { display: none; }
+  .lvs-placeholder {
+    display: flex; align-items: center; gap: 10px;
+    pointer-events: none;
+  }
+  .lvs-placeholder span {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.1em;
+    text-transform: uppercase; color: rgba(255,255,255,.35);
+  }
+  .lvs-placeholder .lvs-hint {
+    font-size: 10px; color: rgba(255,255,255,.2);
+    letter-spacing: 0.06em; text-transform: none; font-weight: 400;
+  }
+  body:not(.editing) .lvs-hint { display: none; }
+  .lvs-overlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,.5);
+    display: none;
+    align-items: center; justify-content: center; flex-direction: column;
+    gap: 6px; color: #fff; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
 
   @media (max-width: 900px) {
     nav { padding: 16px 24px; }
@@ -239,7 +328,6 @@ cat > /mnt/user-data/outputs/index.html << 'HTMLEOF'
 <!-- EDIT BAR -->
 <div id="edit-bar">
   <span id="save-toast">✓ Salvo</span>
-  <button id="btn-export" onclick="exportHTML()">⬇ Baixar HTML</button>
   <button id="toggle-edit" onclick="toggleEdit()">
     <span class="dot"></span>
     <span id="edit-label">Editar portfólio</span>
@@ -248,7 +336,7 @@ cat > /mnt/user-data/outputs/index.html << 'HTMLEOF'
 
 <!-- NAV -->
 <nav>
-  <a class="nav-logo" href="#"><span contenteditable="false" data-key="nav-name">SEU NOME</span></a>
+  <a class="nav-logo" href="#"><span class="editable-inline" contenteditable="false" data-key="nav-name" data-placeholder="SEU NOME">SEU NOME</span></a>
   <ul class="nav-links">
     <li><a href="#projetos">Projetos</a></li>
     <li><a href="#sobre">Sobre</a></li>
@@ -260,15 +348,15 @@ cat > /mnt/user-data/outputs/index.html << 'HTMLEOF'
 <section class="hero">
   <div class="hero-left">
     <p class="hero-eyebrow">
-      <span contenteditable="false" data-key="hero-eyebrow">Coordenação de Comunicação Visual</span>
+      <span contenteditable="false" data-key="hero-eyebrow" data-placeholder="Coordenação de Comunicação Visual">Coordenação de Comunicação Visual</span>
     </p>
     <h1 class="hero-name">
-      <span contenteditable="false" data-key="hero-name1">SEU</span><br>
-      <span contenteditable="false" data-key="hero-name2" class="name-gold">NOME</span><br>
-      <span contenteditable="false" data-key="hero-name3">AQUI</span>
+      <span contenteditable="false" data-key="hero-name" data-placeholder="SEU&#10;NOME&#10;AQUI" style="white-space:pre-line">SEU
+NOME
+<span style="color:var(--gold)">AQUI</span></span>
     </h1>
     <p class="hero-bio">
-      <span contenteditable="false" data-key="hero-bio">Publicitária com MBA em Gestão Estratégica de Marketing. Especialista em comunicação visual, produção de campanhas e gestão de projetos — do briefing à entrega.</span>
+      <span contenteditable="false" data-key="hero-bio" data-placeholder="Sua bio aqui...">Publicitária com MBA em Gestão Estratégica de Marketing. Especialista em comunicação visual, produção de campanhas e gestão de projetos — do briefing à entrega.</span>
     </p>
     <div class="hero-tags" id="hero-tags">
       <span class="tag active" contenteditable="false" data-key="tag-0">Comunicação Visual</span>
@@ -294,12 +382,12 @@ cat > /mnt/user-data/outputs/index.html << 'HTMLEOF'
         <div class="stat-label"><span contenteditable="false" data-key="stat3-lbl">Marketing Estratégico</span></div>
       </div>
       <div class="stat">
-        <div class="stat-num"><span contenteditable="false" data-key="stat4-num">+8</span></div>
-        <div class="stat-label"><span contenteditable="false" data-key="stat4-lbl">Anos de Experiência</span></div>
+        <div class="stat-num"><span contenteditable="false" data-key="stat4-num">↑</span></div>
+        <div class="stat-label"><span contenteditable="false" data-key="stat4-lbl">Resultados Mensuráveis</span></div>
       </div>
     </div>
     <div class="hero-quote">
-      <p><span contenteditable="false" data-key="hero-quote">"Da concepção visual ao PDV — gerencio cada etapa com precisão criativa e foco em resultado."</span></p>
+      <p><span contenteditable="false" data-key="hero-quote" data-placeholder="Sua frase de destaque...">"Da concepção visual ao PDV — gerencio cada etapa com precisão criativa e foco em resultado."</span></p>
     </div>
   </div>
 </section>
@@ -316,52 +404,53 @@ cat > /mnt/user-data/outputs/index.html << 'HTMLEOF'
     <div class="project-visual">
       <div class="photo-placeholder">
         <div class="photo-grid">
-          <div class="photo-slot" onclick="triggerPhoto(this,'p1-img0')">
+          <div class="photo-slot" onclick="triggerPhoto(this, 'p1-img0')" title="Clique para adicionar foto">
             <input type="file" accept="image/*" style="display:none" onchange="loadPhoto(this)">
             <div class="slot-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Foto</span></div>
-            <div class="slot-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Carregar</div>
+            <div class="slot-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Carregar foto</div>
           </div>
-          <div class="photo-slot" onclick="triggerPhoto(this,'p1-img1')">
+          <div class="photo-slot" onclick="triggerPhoto(this, 'p1-img1')" title="Clique para adicionar foto">
             <input type="file" accept="image/*" style="display:none" onchange="loadPhoto(this)">
             <div class="slot-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Foto</span></div>
-            <div class="slot-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Carregar</div>
+            <div class="slot-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Carregar foto</div>
           </div>
-          <div class="photo-slot" onclick="triggerPhoto(this,'p1-img2')">
+          <div class="photo-slot" onclick="triggerPhoto(this, 'p1-img2')" title="Clique para adicionar foto">
             <input type="file" accept="image/*" style="display:none" onchange="loadPhoto(this)">
             <div class="slot-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Foto</span></div>
-            <div class="slot-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Carregar</div>
+            <div class="slot-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Carregar foto</div>
           </div>
-          <div class="photo-slot" onclick="triggerPhoto(this,'p1-img3')">
+          <div class="photo-slot" onclick="triggerPhoto(this, 'p1-img3')" title="Clique para adicionar foto">
             <input type="file" accept="image/*" style="display:none" onchange="loadPhoto(this)">
             <div class="slot-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Foto</span></div>
-            <div class="slot-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Carregar</div>
+            <div class="slot-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Carregar foto</div>
           </div>
         </div>
-        <p class="photo-label">Adicione fotos do projeto</p>
+        <p class="photo-label">Adicione fotos do evento</p>
       </div>
     </div>
     <div class="project-content">
-      <span class="project-tag" contenteditable="false" data-key="p1-tag">Produção de Eventos</span>
-      <h3 class="project-title" contenteditable="false" data-key="p1-title">PRODUÇÃO DE EVENTOS &amp; CONTEÚDO</h3>
-      <p class="project-desc" contenteditable="false" data-key="p1-desc">Gerenciamento completo de eventos, desde o planejamento estratégico até a execução. Responsável pela produção de conteúdo e comunicação visual, garantindo consistência de identidade em todos os pontos de contato com o público.</p>
+      <span class="project-tag" contenteditable="false" data-key="p1-tag" data-placeholder="Categoria">Produção de Eventos</span>
+      <h3 class="project-title" contenteditable="false" data-key="p1-title" data-placeholder="Título do projeto">PRODUÇÃO DE EVENTOS &amp; CONTEÚDO</h3>
+      <p class="project-desc" contenteditable="false" data-key="p1-desc" data-placeholder="Descrição do projeto...">Gerenciamento completo de eventos, desde o planejamento estratégico até a execução. Responsável pela produção de conteúdo e comunicação visual, garantindo consistência de identidade em todos os pontos de contato com o público.</p>
       <div class="skills-list" id="skills-p1">
         <span class="skill-badge" contenteditable="false" data-key="p1-sk0">Gestão de Eventos</span>
         <span class="skill-badge" contenteditable="false" data-key="p1-sk1">Comunicação Visual</span>
-        <span class="skill-badge" contenteditable="false" data-key="p1-sk2">Briefing</span>
-        <span class="skill-badge" contenteditable="false" data-key="p1-sk3">Identidade Visual</span>
+        <span class="skill-badge" contenteditable="false" data-key="p1-sk2">Conteúdo</span>
+        <span class="skill-badge" contenteditable="false" data-key="p1-sk3">Briefing</span>
+        <span class="skill-badge" contenteditable="false" data-key="p1-sk4">Identidade Visual</span>
         <button class="add-skill-btn" onclick="addSkill('skills-p1','p1-sk')">+ skill</button>
       </div>
     </div>
   </div>
 
-  <!-- 2. Bernardinho — dark card -->
+  <!-- 2. Bernardinho -->
   <div class="project-card reverse dark-card">
     <div class="project-visual">
       <div class="video-slot">
         <div class="video-embed-wrap" id="video-embed"></div>
         <div class="video-placeholder-ui" id="video-placeholder-ui">
           <div class="play-btn"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-          <p style="font-size:13px;color:rgba(255,255,255,.5);text-align:center;line-height:1.6;">Cole o link do vídeo abaixo<br><span style="font-size:11px;color:rgba(255,255,255,.3);">YouTube ou Vimeo</span></p>
+          <p style="font-size:13px;color:rgba(255,255,255,.5);text-align:center;line-height:1.6;">Campanha com Bernardinho<br><span style="font-size:11px;color:rgba(255,255,255,.3);">Técnico da Seleção Brasileira de Vôlei — Copa do Mundo</span></p>
         </div>
         <div class="video-url-input-wrap">
           <div class="video-url-box">
@@ -372,8 +461,8 @@ cat > /mnt/user-data/outputs/index.html << 'HTMLEOF'
           <button class="video-set-btn" onclick="embedVideo()">Incorporar vídeo</button>
         </div>
         <div class="results-strip" id="results-strip">
-          <span class="result-pill" contenteditable="false" data-key="res0">Alcance</span>
-          <span class="result-pill" contenteditable="false" data-key="res1">Engajamento</span>
+          <span class="result-pill" contenteditable="false" data-key="res0" data-placeholder="Resultado">Adicione resultados</span>
+          <span class="result-pill" contenteditable="false" data-key="res1" data-placeholder="Ex: Alcance">Ex: Alcance</span>
           <button class="add-result-btn" onclick="addResult()">+ resultado</button>
         </div>
       </div>
@@ -381,87 +470,140 @@ cat > /mnt/user-data/outputs/index.html << 'HTMLEOF'
     <div class="project-content">
       <span class="project-tag" contenteditable="false" data-key="p2-tag">Campanha On-line &amp; Off-line</span>
       <h3 class="project-title" contenteditable="false" data-key="p2-title">CAMPANHA COM BERNARDINHO</h3>
-      <p class="project-desc" contenteditable="false" data-key="p2-desc">Roteirização e direção de campanha com Bernardinho, técnico da Seleção Brasileira de Vôlei. Gestão integrada de produção on-line e off-line, com controle de cronograma, fornecedores e aprovações.</p>
+      <p class="project-desc" contenteditable="false" data-key="p2-desc">Roteirização e direção de campanha com Bernardinho, técnico da Seleção Brasileira de Vôlei, durante a Copa do Mundo. Gestão integrada de produção on-line e off-line, com controle de cronograma, fornecedores e aprovações.</p>
       <div class="skills-list" id="skills-p2">
         <span class="skill-badge" contenteditable="false" data-key="p2-sk0">Roteiro</span>
         <span class="skill-badge" contenteditable="false" data-key="p2-sk1">Direção</span>
         <span class="skill-badge" contenteditable="false" data-key="p2-sk2">Produção Audiovisual</span>
         <span class="skill-badge" contenteditable="false" data-key="p2-sk3">Campanha 360°</span>
+        <span class="skill-badge" contenteditable="false" data-key="p2-sk4">Gestão de Produção</span>
         <button class="add-skill-btn" onclick="addSkill('skills-p2','p2-sk')">+ skill</button>
       </div>
     </div>
   </div>
 
-  <!-- 3. Trade Marketing -->
+  <!-- 3. Gestão Visual -->
   <div class="project-card">
     <div class="project-visual">
       <div class="photo-placeholder">
         <div class="photo-grid">
           <div class="photo-slot" onclick="triggerPhoto(this,'p3-img0')">
             <input type="file" accept="image/*" style="display:none" onchange="loadPhoto(this)">
-            <div class="slot-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Foto</span></div>
-            <div class="slot-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Carregar</div>
+            <div class="slot-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Peça Off</span></div>
+            <div class="slot-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Carregar foto</div>
           </div>
           <div class="photo-slot" onclick="triggerPhoto(this,'p3-img1')">
             <input type="file" accept="image/*" style="display:none" onchange="loadPhoto(this)">
-            <div class="slot-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Foto</span></div>
-            <div class="slot-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Carregar</div>
+            <div class="slot-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Ação</span></div>
+            <div class="slot-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Carregar foto</div>
           </div>
           <div class="photo-slot" onclick="triggerPhoto(this,'p3-img2')">
             <input type="file" accept="image/*" style="display:none" onchange="loadPhoto(this)">
-            <div class="slot-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Foto</span></div>
-            <div class="slot-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Carregar</div>
+            <div class="slot-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Trade</span></div>
+            <div class="slot-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Carregar foto</div>
           </div>
           <div class="photo-slot" onclick="triggerPhoto(this,'p3-img3')">
             <input type="file" accept="image/*" style="display:none" onchange="loadPhoto(this)">
-            <div class="slot-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Foto</span></div>
-            <div class="slot-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Carregar</div>
+            <div class="slot-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Evento</span></div>
+            <div class="slot-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Carregar foto</div>
           </div>
         </div>
-        <p class="photo-label">Adicione fotos do projeto</p>
+        <p class="photo-label">Materiais de campanha &amp; ações</p>
       </div>
     </div>
     <div class="project-content">
-      <span class="project-tag" contenteditable="false" data-key="p3-tag">Trade Marketing &amp; PDV</span>
+      <span class="project-tag" contenteditable="false" data-key="p3-tag">Produção Visual &amp; Trade Marketing</span>
       <h3 class="project-title" contenteditable="false" data-key="p3-title">GESTÃO VISUAL OFF-LINE &amp; TRADE</h3>
-      <p class="project-desc" contenteditable="false" data-key="p3-desc">Gerenciamento de produção visual e controle de orçamento em campanhas off-line, ações para eventos e materiais de Trade Marketing e PDV, do briefing à entrega final.</p>
+      <p class="project-desc" contenteditable="false" data-key="p3-desc">Gerenciamento de produção visual e controle de orçamento em campanhas off-line, ações para eventos e materiais de Trade Marketing. Acompanhamento de cronogramas, fornecedores e aprovações com foco em eficiência e qualidade de entrega.</p>
       <div class="skills-list" id="skills-p3">
         <span class="skill-badge" contenteditable="false" data-key="p3-sk0">Produção Off-line</span>
-        <span class="skill-badge" contenteditable="false" data-key="p3-sk1">Trade Marketing</span>
-        <span class="skill-badge" contenteditable="false" data-key="p3-sk2">Budget</span>
-        <span class="skill-badge" contenteditable="false" data-key="p3-sk3">Fornecedores</span>
+        <span class="skill-badge" contenteditable="false" data-key="p3-sk1">Controle de Budget</span>
+        <span class="skill-badge" contenteditable="false" data-key="p3-sk2">Trade Marketing</span>
+        <span class="skill-badge" contenteditable="false" data-key="p3-sk3">Gestão de Fornecedores</span>
         <button class="add-skill-btn" onclick="addSkill('skills-p3','p3-sk')">+ skill</button>
       </div>
     </div>
   </div>
 
+  <!-- 4. PDV -->
+  <div class="project-card reverse dark-card">
+    <div class="project-visual">
+      <div class="photo-placeholder" style="gap:10px;">
+        <div class="photo-grid">
+          <div class="photo-slot" onclick="triggerPhoto(this,'p4-img0')">
+            <input type="file" accept="image/*" style="display:none" onchange="loadPhoto(this)">
+            <div class="slot-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>PDV</span></div>
+            <div class="slot-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Carregar foto</div>
+          </div>
+          <div class="photo-slot" onclick="triggerPhoto(this,'p4-img1')">
+            <input type="file" accept="image/*" style="display:none" onchange="loadPhoto(this)">
+            <div class="slot-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Loja</span></div>
+            <div class="slot-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Carregar foto</div>
+          </div>
+          <div class="photo-slot" onclick="triggerPhoto(this,'p4-img2')">
+            <input type="file" accept="image/*" style="display:none" onchange="loadPhoto(this)">
+            <div class="slot-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Display</span></div>
+            <div class="slot-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Carregar foto</div>
+          </div>
+          <div class="photo-slot" onclick="triggerPhoto(this,'p4-img3')">
+            <input type="file" accept="image/*" style="display:none" onchange="loadPhoto(this)">
+            <div class="slot-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Material</span></div>
+            <div class="slot-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Carregar foto</div>
+          </div>
+        </div>
+
+        <!-- VIDEO LOCAL SLOT -->
+        <div class="local-video-slot" id="pdv-video-slot" onclick="triggerLocalVideo()" title="Clique para carregar vídeo">
+          <input type="file" id="pdv-video-input" accept="video/*" style="display:none" onchange="loadLocalVideo(this)">
+
+          <!-- placeholder state -->
+          <div class="lvs-placeholder" id="pdv-video-placeholder">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1.5">
+              <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+            </svg>
+            <span>Vídeo PDV</span>
+            <span class="lvs-hint">Clique para carregar</span>
+          </div>
+
+          <!-- hover overlay (edit mode only) -->
+          <div class="slot-overlay lvs-overlay">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Carregar vídeo
+          </div>
+
+          <!-- loaded state -->
+          <video id="pdv-video-player" controls style="display:none;width:100%;height:100%;object-fit:cover;border-radius:4px;"></video>
+        </div>
+
+        <p class="photo-label" style="color:rgba(255,255,255,.3)">Materiais de PDV e varejo</p>
+      </div>
+    </div>
+    <div class="project-content">
+      <span class="project-tag" contenteditable="false" data-key="p4-tag">Varejo &amp; PDV</span>
+      <h3 class="project-title" contenteditable="false" data-key="p4-title">MATERIAIS PARA PDV — VAREJO</h3>
+      <p class="project-desc" contenteditable="false" data-key="p4-desc">Gestão da produção de materiais para Ponto de Venda em lojas do segmento de varejo. Coordenação do fluxo entre criação, aprovação e produção gráfica, garantindo consistência visual e cumprimento de prazos de campanha.</p>
+      <div class="skills-list" id="skills-p4">
+        <span class="skill-badge" contenteditable="false" data-key="p4-sk0">PDV</span>
+        <span class="skill-badge" contenteditable="false" data-key="p4-sk1">Varejo</span>
+        <span class="skill-badge" contenteditable="false" data-key="p4-sk2">Produção Gráfica</span>
+        <span class="skill-badge" contenteditable="false" data-key="p4-sk3">Aprovação de Arte</span>
+        <button class="add-skill-btn" onclick="addSkill('skills-p4','p4-sk')">+ skill</button>
+      </div>
+    </div>
+  </div>
 </section>
 
 <!-- SOBRE -->
 <section id="sobre">
   <div class="section-header">
-    <span class="section-label" style="color:var(--gold)">Perfil</span>
+    <span class="section-label">Perfil</span>
     <h2 class="section-title">SOBRE MIM</h2>
   </div>
   <div class="about-grid">
-    <div>
-      <div class="about-photo" id="about-photo-slot" onclick="triggerAboutPhoto()">
-        <input type="file" id="about-photo-input" accept="image/*" style="display:none" onchange="loadAboutPhoto(this)">
-        <div class="slot-icon">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <span style="color:rgba(255,255,255,.3)">Sua foto aqui</span>
-        </div>
-        <div class="slot-overlay">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          Carregar foto
-        </div>
-      </div>
-    </div>
-    <div>
-      <div class="about-text">
-        <p contenteditable="false" data-key="about-p1">Publicitária com formação em <strong>Publicidade e Propaganda</strong> e <strong>MBA em Gestão Estratégica de Marketing</strong>, com trajetória sólida na intersecção entre criatividade e gestão.</p>
-        <p contenteditable="false" data-key="about-p2">Atuo na coordenação de comunicação visual com visão de campanha 360°, integrando produção on-line, off-line, trade marketing e gestão de eventos em projetos de alto impacto.</p>
-      </div>
+    <div class="about-text">
+      <p><span contenteditable="false" data-key="about-p1">Publicitária com formação em <strong>Publicidade e Propaganda</strong> e MBA em <strong>Gestão Estratégica de Marketing</strong>, com trajetória sólida na intersecção entre criatividade e gestão.</span></p>
+      <p><span contenteditable="false" data-key="about-p2">Atuo na coordenação de comunicação visual com visão de campanha 360°, integrando produção on-line, off-line, trade marketing e gestão de eventos em projetos de alto impacto.</span></p>
+      <p><span contenteditable="false" data-key="about-p3">Experiência em <strong>roteirização e direção</strong> de campanhas, gerenciamento de fornecedores e controle de orçamento — sempre com foco em entrega de qualidade e resultados mensuráveis.</span></p>
       <div class="edu-block">
         <div class="edu-item">
           <div class="edu-degree" contenteditable="false" data-key="edu1-degree">MBA em Gestão Estratégica de Marketing</div>
@@ -472,70 +614,80 @@ cat > /mnt/user-data/outputs/index.html << 'HTMLEOF'
           <div class="edu-inst" contenteditable="false" data-key="edu2-inst">Nome da Instituição · Ano de conclusão</div>
         </div>
       </div>
-      <div class="expertise-grid">
-        <div class="expertise-item">
-          <div class="exp-icon"><svg width="16" height="16" viewBox="0 0 24 24" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
-          <div class="exp-title" contenteditable="false" data-key="exp1-title">Campanhas On-line</div>
-          <div class="exp-desc" contenteditable="false" data-key="exp1-desc">Estratégia, produção e gestão de campanhas digitais</div>
-        </div>
-        <div class="expertise-item">
-          <div class="exp-icon"><svg width="16" height="16" viewBox="0 0 24 24" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></div>
-          <div class="exp-title" contenteditable="false" data-key="exp2-title">Produção Audiovisual</div>
-          <div class="exp-desc" contenteditable="false" data-key="exp2-desc">Roteiro, direção e produção de campanhas de vídeo</div>
-        </div>
-        <div class="expertise-item">
-          <div class="exp-icon"><svg width="16" height="16" viewBox="0 0 24 24" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
-          <div class="exp-title" contenteditable="false" data-key="exp3-title">PDV &amp; Trade</div>
-          <div class="exp-desc" contenteditable="false" data-key="exp3-desc">Materiais de varejo e ações de trade marketing</div>
-        </div>
-        <div class="expertise-item">
-          <div class="exp-icon"><svg width="16" height="16" viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-          <div class="exp-title" contenteditable="false" data-key="exp4-title">Gestão de Eventos</div>
-          <div class="exp-desc" contenteditable="false" data-key="exp4-desc">Planejamento e execução com comunicação visual</div>
-        </div>
-      </div>
+    </div>
+    <div class="expertise-grid">
+      <div class="expertise-item"><div class="exp-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9974A" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div class="exp-title" contenteditable="false" data-key="ex1-t">Campanhas On-line</div><div class="exp-desc" contenteditable="false" data-key="ex1-d">Estratégia, produção e gestão de campanhas digitais integradas</div></div>
+      <div class="expertise-item"><div class="exp-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9974A" stroke-width="2"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></svg></div><div class="exp-title" contenteditable="false" data-key="ex2-t">Produção Audiovisual</div><div class="exp-desc" contenteditable="false" data-key="ex2-d">Roteiro, direção e produção de campanhas de vídeo</div></div>
+      <div class="expertise-item"><div class="exp-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9974A" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div class="exp-title" contenteditable="false" data-key="ex3-t">PDV &amp; Trade</div><div class="exp-desc" contenteditable="false" data-key="ex3-d">Materiais de varejo e ações de trade marketing</div></div>
+      <div class="expertise-item"><div class="exp-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9974A" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="exp-title" contenteditable="false" data-key="ex4-t">Gestão de Eventos</div><div class="exp-desc" contenteditable="false" data-key="ex4-d">Planejamento e execução de eventos com comunicação visual</div></div>
+      <div class="expertise-item"><div class="exp-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9974A" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="exp-title" contenteditable="false" data-key="ex5-t">Controle de Budget</div><div class="exp-desc" contenteditable="false" data-key="ex5-d">Orçamento, negociação e controle de fornecedores</div></div>
+      <div class="expertise-item"><div class="exp-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9974A" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="exp-title" contenteditable="false" data-key="ex6-t">Gestão Off-line</div><div class="exp-desc" contenteditable="false" data-key="ex6-d">Produção gráfica, impressos e materiais de campanha</div></div>
     </div>
   </div>
 </section>
 
 <!-- CONTATO -->
 <section id="contato">
-  <div class="section-header">
-    <span class="section-label">Contato</span>
-    <h2 class="section-title">VAMOS CONVERSAR?</h2>
-  </div>
-  <p class="contact-lead" contenteditable="false" data-key="contact-lead">Aberta a novas oportunidades em coordenação de comunicação visual. Entre em contato para conversarmos.</p>
-  <a href="mailto:seuemail@email.com" class="contact-cta" id="contact-cta-btn" contenteditable="false" data-key="contact-email-btn">Enviar e-mail</a>
+  <div class="section-header"><span class="section-label">Contato</span><h2 class="section-title">VAMOS CONVERSAR?</h2></div>
+  <p class="contact-lead"><span contenteditable="false" data-key="contact-lead">Aberta a novas oportunidades em coordenação de comunicação visual. Entre em contato para conversarmos sobre como posso contribuir com o seu time.</span></p>
+  <a href="#" class="contact-cta" id="contact-cta-link"><span contenteditable="false" data-key="contact-cta-text">Enviar mensagem</span></a>
   <div class="contact-info">
-    <span class="contact-item">E-mail: <a href="mailto:seuemail@email.com" contenteditable="false" data-key="contact-email">seuemail@email.com</a></span>
-    <span class="contact-item">LinkedIn: <a href="https://linkedin.com" target="_blank" contenteditable="false" data-key="contact-linkedin">linkedin.com/in/seuperfil</a></span>
-    <span class="contact-item" contenteditable="false" data-key="contact-local">📍 Cidade, Estado</span>
+    <span class="contact-item">📧 <a href="#" id="email-link" contenteditable="false" data-key="contact-email">seuemail@email.com</a></span>
+    <span class="contact-item">💼 <a href="#" id="linkedin-link" contenteditable="false" data-key="contact-linkedin">LinkedIn</a></span>
+    <span class="contact-item">📍 <span contenteditable="false" data-key="contact-local">Cidade, Estado</span></span>
   </div>
 </section>
 
 <footer>
-  <span contenteditable="false" data-key="footer-name">© 2026 SEU NOME</span>
-  <span>Comunicação Visual · MBA Marketing Estratégico</span>
+  <span contenteditable="false" data-key="footer-left">© 2026 Seu Nome — Portfólio de Comunicação Visual</span>
+  <span contenteditable="false" data-key="footer-right">Publicidade &amp; Propaganda · MBA Marketing Estratégico</span>
 </footer>
 
 <script>
+// ── STATE ──
 let isEditing = false;
-const storage = {};
+const storage = {}; // in-memory storage for text
+const imageStorage = {}; // in-memory for images (base64)
 
+// ── TOGGLE EDIT ──
 function toggleEdit() {
   isEditing = !isEditing;
   document.body.classList.toggle('editing', isEditing);
-  document.getElementById('edit-label').textContent = isEditing ? 'Sair da edição' : 'Editar portfólio';
-  document.querySelectorAll('[data-key]').forEach(el => {
+  document.getElementById('edit-label').textContent = isEditing ? 'Concluir edição' : 'Editar portfólio';
+
+  const editables = document.querySelectorAll('[contenteditable]');
+  editables.forEach(el => {
     el.contentEditable = isEditing ? 'true' : 'false';
-    if (isEditing) el.addEventListener('blur', saveText);
+    if (isEditing) {
+      el.addEventListener('blur', saveText);
+      el.addEventListener('input', scheduleAutoSave);
+    }
   });
-  if (!isEditing) showToast();
+
+  if (!isEditing) saveAll();
+}
+
+// ── SAVE / LOAD TEXT ──
+let saveTimer;
+function scheduleAutoSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveAll, 1200);
 }
 
 function saveText(e) {
   const key = e.target.dataset.key;
   if (key) storage[key] = e.target.innerHTML;
+}
+
+function saveAll() {
+  document.querySelectorAll('[data-key]').forEach(el => {
+    storage[el.dataset.key] = el.innerHTML;
+  });
+  // Save video url
+  const videoUrl = document.getElementById('video-input-field').value;
+  if (videoUrl) storage['_videoUrl'] = videoUrl;
+
+  showToast();
 }
 
 function showToast() {
@@ -544,6 +696,7 @@ function showToast() {
   setTimeout(() => t.classList.remove('show'), 2000);
 }
 
+// ── PHOTO UPLOAD ──
 function triggerPhoto(slot, key) {
   if (!isEditing) return;
   const input = slot.querySelector('input[type=file]');
@@ -557,105 +710,131 @@ function loadPhoto(input) {
   const reader = new FileReader();
   reader.onload = e => {
     const slot = input.closest('.photo-slot');
-    let img = slot.querySelector('img');
-    if (!img) { img = document.createElement('img'); slot.appendChild(img); }
-    img.src = e.target.result;
-    slot.querySelector('.slot-icon').style.opacity = '0';
+    const key = input.dataset.key;
+    const src = e.target.result;
+    imageStorage[key] = src;
+    applyPhoto(slot, src);
     showToast();
   };
   reader.readAsDataURL(file);
 }
 
-function triggerAboutPhoto() {
-  if (!isEditing) return;
-  document.getElementById('about-photo-input').click();
+function applyPhoto(slot, src) {
+  let img = slot.querySelector('img');
+  if (!img) {
+    img = document.createElement('img');
+    slot.appendChild(img);
+  }
+  img.src = src;
+  slot.querySelector('.slot-icon').style.opacity = '0';
 }
 
-function loadAboutPhoto(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const slot = document.getElementById('about-photo-slot');
-    let img = slot.querySelector('img');
-    if (!img) { img = document.createElement('img'); slot.appendChild(img); }
-    img.src = e.target.result;
-    slot.querySelector('.slot-icon').style.opacity = '0';
-    showToast();
-  };
-  reader.readAsDataURL(file);
-}
-
+// ── VIDEO EMBED ──
 function embedVideo() {
-  const url = document.getElementById('video-input-field').value.trim();
+  const input = document.getElementById('video-input-field');
+  const url = input.value.trim();
   if (!url) return;
+
   let embedUrl = '';
+  // YouTube
   const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
-  if (ytMatch) embedUrl = 'https://www.youtube.com/embed/' + ytMatch[1];
+  if (ytMatch) embedUrl = `https://www.youtube.com/embed/${ytMatch[1]}`;
+  // Vimeo
   const vmMatch = url.match(/vimeo\.com\/(\d+)/);
-  if (vmMatch) embedUrl = 'https://player.vimeo.com/video/' + vmMatch[1];
-  if (!embedUrl) { alert('Cole um link do YouTube ou Vimeo válido.'); return; }
+  if (vmMatch) embedUrl = `https://player.vimeo.com/video/${vmMatch[1]}`;
+
+  if (!embedUrl) {
+    alert('Cole um link do YouTube ou Vimeo válido.');
+    return;
+  }
+
   const wrap = document.getElementById('video-embed');
-  wrap.innerHTML = '<iframe src="' + embedUrl + '" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>';
+  wrap.innerHTML = `<iframe src="${embedUrl}" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>`;
   wrap.style.display = 'block';
   document.getElementById('video-placeholder-ui').style.display = 'none';
   document.getElementById('video-url-display').textContent = url;
+  storage['_videoUrl'] = url;
+  storage['_videoEmbed'] = embedUrl;
   showToast();
 }
 
+// ── ADD TAGS ──
 function addTag() {
   const container = document.getElementById('hero-tags');
   const btn = container.querySelector('.add-tag-btn');
   const span = document.createElement('span');
   span.className = 'tag';
   span.contentEditable = 'true';
-  span.dataset.key = 'tag-' + container.querySelectorAll('.tag').length;
+  const idx = container.querySelectorAll('.tag').length;
+  span.dataset.key = 'tag-' + idx;
   span.textContent = 'Nova tag';
   container.insertBefore(span, btn);
   span.focus();
   span.addEventListener('blur', saveText);
 }
 
+// ── ADD SKILLS ──
 function addSkill(listId, prefix) {
   const list = document.getElementById(listId);
   const btn = list.querySelector('.add-skill-btn');
   const span = document.createElement('span');
   span.className = 'skill-badge';
   span.contentEditable = isEditing ? 'true' : 'false';
-  span.dataset.key = prefix + list.querySelectorAll('.skill-badge').length;
+  const idx = list.querySelectorAll('.skill-badge').length;
+  span.dataset.key = prefix + idx;
   span.textContent = 'Nova skill';
   list.insertBefore(span, btn);
   span.focus();
   span.addEventListener('blur', saveText);
 }
 
+// ── ADD RESULTS ──
 function addResult() {
   const strip = document.getElementById('results-strip');
   const btn = strip.querySelector('.add-result-btn');
   const span = document.createElement('span');
   span.className = 'result-pill';
   span.contentEditable = 'true';
-  span.dataset.key = 'res' + strip.querySelectorAll('.result-pill').length;
+  const idx = strip.querySelectorAll('.result-pill').length;
+  span.dataset.key = 'res' + idx;
   span.textContent = 'Resultado';
   strip.insertBefore(span, btn);
   span.focus();
   span.addEventListener('blur', saveText);
 }
 
-function exportHTML() {
-  const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-  const blob = new Blob([html], {type: 'text/html'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'index.html';
-  a.click();
+// ── LOCAL VIDEO UPLOAD (PDV) ──
+function triggerLocalVideo() {
+  if (!isEditing) return;
+  document.getElementById('pdv-video-input').click();
+}
+
+function loadLocalVideo(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  const player = document.getElementById('pdv-video-player');
+  const slot   = document.getElementById('pdv-video-slot');
+  player.src = url;
+  player.style.display = 'block';
+  slot.classList.add('has-video');
+  // stop click-to-upload from firing when user clicks the player controls
+  player.onclick = e => e.stopPropagation();
   showToast();
 }
+
+
+// (In-memory only — images and text persist while the tab is open)
+// For persistent cross-session storage, host the file and use a backend.
+window.addEventListener('DOMContentLoaded', () => {
+  // restore video if previously set this session
+  if (storage['_videoEmbed']) {
+    const wrap = document.getElementById('video-embed');
+    wrap.innerHTML = `<iframe src="${storage['_videoEmbed']}" allowfullscreen></iframe>`;
+    wrap.style.display = 'block';
+    document.getElementById('video-placeholder-ui').style.display = 'none';
+  }
+});
 </script>
 </body>
 </html>
-HTMLEOF
-echo "Done"
-Saída
-
-Done
